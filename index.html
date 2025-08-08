@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Hope Orbs - Collect the Light</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #111;
+            color: #fff;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #game-canvas {
+            position: relative;
+            z-index: 1;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        /* Menu Screen Styles */
+        #menu-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111; /* Changed from gradient to solid color */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            text-align: center;
+            color: #fff;
+        }
+
+        #menu-screen.hidden {
+            display: none;
+        }
+
+        #menu-title {
+            font-size: 72px;
+            font-weight: bold;
+            color: #ffff96;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+        }
+
+        #menu-subtitle {
+            font-size: 24px;
+            color: #ff9632;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .menu-button {
+            padding: 18px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            background: #ff9632; /* Changed from gradient to solid color */
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 10px;
+            pointer-events: all;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            touch-action: manipulation;
+            min-width: 200px;
+        }
+
+        .menu-button:hover {
+            background: #ffff96; /* Changed from gradient to solid color */
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 150, 50, 0.5);
+        }
+
+        .menu-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Instructions Screen Styles */
+        #instructions-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111; /* Changed from gradient to solid color */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            text-align: center;
+            color: #fff;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        #instructions-screen.hidden {
+            display: none;
+        }
+
+        #instructions-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffff96;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            margin-bottom: 30px;
+        }
+
+        .instruction-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 15px 0;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        .instruction-section h3 {
+            font-size: 24px;
+            color: #ff9632;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .instruction-section p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .control-item {
+            background: rgba(255, 255, 150, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .control-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        #back-button {
+            margin-top: 30px;
+        }
+
+        #score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffff96;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 14px;
+            color: #ffff96;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            max-width: 80%;
+        }
+
+        #game-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            text-align: center;
+        }
+
+        #game-over-screen.hidden {
+            display: none;
+        }
+
+        #game-over-screen h1 {
+            font-size: 48px;
+            color: #ff9632;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        #game-over-screen h2 {
+            font-size: 32px;
+            color: #ffff96;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #game-over-screen p {
+            font-size: 20px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        #restart-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #ff9632; /* Changed from gradient to solid color */
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: all;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        #restart-button:hover {
+            background: #ffff96; /* Changed from gradient to solid color */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 150, 50, 0.4);
+        }
+
+        #restart-button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            #score-display {
+                font-size: 16px;
+                top: 10px;
+                left: 10px;
+            }
+
+            #instructions {
+                font-size: 12px;
+                bottom: 10px;
+                left: 10px;
+            }
+
+            #game-over-screen h1 {
+                font-size: 36px;
+            }
+
+            #game-over-screen h2 {
+                font-size: 24px;
+            }
+
+            #restart-button {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #game-over-screen h1 {
+                font-size: 28px;
+            }
+
+            #game-over-screen h2 {
+                font-size: 20px;
+            }
+
+            #instructions {
+                font-size: 11px;
+                max-width: 90%;
+            }
+
+            #menu-title {
+                font-size: 48px;
+            }
+
+            #menu-subtitle {
+                font-size: 18px;
+            }
+
+            .menu-button {
+                padding: 15px 30px;
+                font-size: 16px;
+                min-width: 180px;
+            }
+
+            #instructions-title {
+                font-size: 36px;
+            }
+
+            .instruction-section {
+                padding: 20px;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Screen -->
+    <div id="menu-screen">
+        <h1 id="menu-title">Hope Orbs</h1>
+        <p id="menu-subtitle">Collect the Light, Avoid the Darkness</p>
+        <button class="menu-button" id="play-button">Play Game</button>
+        <button class="menu-button" id="how-to-play-button">How to Play</button>
+    </div>
+
+    <!-- Instructions Screen -->
+    <div id="instructions-screen" class="hidden">
+        <h1 id="instructions-title">How to Play</h1>
+
+        <div class="instruction-section">
+            <h3>Objective</h3>
+            <p>Collect yellow Hope Orbs while avoiding red enemies. The screen gets brighter as you collect more orbs!</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>Controls</h3>
+            <p>Move your mouse or finger to control your character</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>Game Rules</h3>
+            <p>• Yellow orbs = good (collect them)</p>
+            <p>• Red enemies = bad (avoid them)</p>
+            <p>• More enemies appear over time</p>
+        </div>
+
+        <button class="menu-button" id="back-button">Back to Menu</button>
+        <button class="menu-button" id="start-from-instructions">Start Playing</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container" class="hidden">
+        <div id="ui-overlay">
+            <div id="score-display">Hope Orbs Collected: 0</div>
+            <div id="instructions">Move your mouse or finger to collect Hope Orbs (yellow). Avoid red enemies!</div>
+        </div>
+        <div id="game-canvas"></div>
+        <div id="game-over-screen" class="hidden">
+            <h1>Game Over</h1>
+            <h2>Keep Hope Alive!</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <button id="restart-button">Play Again</button>
+                <button id="menu-button" class="menu-button">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
