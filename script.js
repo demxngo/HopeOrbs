@@ -1,5 +1,4 @@
 
-// Hope Orbs Game - Touchscreen optimized collection game with menu
 // Game variables
 let player;
 let hopeOrbs = [];
@@ -8,7 +7,7 @@ let score = 0;
 let brightness = 20;
 let gameOver = false;
 let gameStarted = false;
-let currentScreen = 'menu'; // 'menu', 'instructions', 'game'
+let currentScreen = 'menu'; 
 
 // UI elements
 let scoreDisplay;
@@ -19,7 +18,7 @@ let menuScreen;
 let instructionsScreen;
 let gameContainer;
 
-// Game settings - Make responsive for mobile
+// Game settings
 const CANVAS_WIDTH = Math.min(800, window.innerWidth - 40);
 const CANVAS_HEIGHT = Math.min(600, window.innerHeight - 100);
 const PLAYER_SIZE = 30;
@@ -172,7 +171,7 @@ function draw() {
 
     // Check collisions
     if (player) {
-        // Check player-orb collisions
+        // Check player to orb collisions
         for (let i = hopeOrbs.length - 1; i >= 0; i--) {
             let orb = hopeOrbs[i];
             let distance = dist(player.x, player.y, orb.x, orb.y);
@@ -181,7 +180,7 @@ function draw() {
             }
         }
 
-        // Check player-enemy collisions
+        // Check player to enemy collisions
         for (let enemy of enemies) {
             let distance = dist(player.x, player.y, enemy.x, enemy.y);
             if (distance < (PLAYER_SIZE/2 + ENEMY_SIZE/2)) {
@@ -250,7 +249,7 @@ function draw() {
         pop();
     }
 
-    // Spawn new orbs and enemies periodically
+    // Spawn new orbs and enemies at a time
     if (frameCount % ORB_SPAWN_INTERVAL === 0) {
         spawnHopeOrb();
     }
@@ -267,7 +266,7 @@ function collectOrb(index) {
     // Increase score
     score++;
 
-    // Increase brightness (hope!)
+    // Increase brightness
     brightness = min(255, brightness + 10);
 
     // Update score display
@@ -282,7 +281,7 @@ function hitEnemy() {
 }
 
 function spawnHopeOrb() {
-    // Create a hope orb at random position
+    // Create a hope orb at random positions
     let orb = {
         x: random(ORB_SIZE, width - ORB_SIZE),
         y: random(ORB_SIZE, height - ORB_SIZE)
@@ -372,8 +371,7 @@ function updateScoreDisplay() {
 
 // Handle window resize
 function windowResized() {
-    // Keep the canvas size fixed for consistent gameplay
-    // The CSS will handle responsive scaling
+    // Keep the canvas size fixed 
 }
 
 // Prevent context menu on right click
@@ -383,7 +381,7 @@ document.addEventListener('contextmenu', function(e) {
 
 // Handle touch events for mobile
 function touchStarted() {
-    // Update mouse position to touch position for mobile support
+    // Update mouse position to touch position 
     if (touches && touches.length > 0) {
         mouseX = touches[0].x;
         mouseY = touches[0].y;
@@ -393,7 +391,7 @@ function touchStarted() {
 }
 
 function touchMoved() {
-    // Update mouse position to touch position for mobile support
+    // Update mouse position to touch position
     if (touches && touches.length > 0) {
         mouseX = touches[0].x;
         mouseY = touches[0].y;
@@ -406,7 +404,7 @@ function touchEnded() {
     return false;
 }
 
-// Add touch event listeners for better mobile support
+// Add touch event listeners
 document.addEventListener('touchstart', function(e) {
     e.preventDefault();
 }, { passive: false });
